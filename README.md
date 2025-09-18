@@ -18,7 +18,7 @@
 
 ## 🚀 使い方
 
-1. ブラウザで [このページ](https://<ユーザー名>.github.io/block-blast-helper/) を開きます。
+1. ブラウザで [このページ]([https://<ユーザー名>.github.io/block-blast-helper/](https://toroimerai.github.io/blockblast-helper_v0.01/) を開きます。
 2. 下に並んでいるブロックから配置したい形をクリックして選びます。
 3. 盤面に表示される候補位置（青色）をクリックして配置します。
 4. 列または行がすべて埋まると自動で消去されます。
