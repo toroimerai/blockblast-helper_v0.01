@@ -57,7 +57,6 @@ let selectedBlock = null;
 const boardEl = document.getElementById('board');
 const blocksEl = document.getElementById('blocks');
 
-// 盤面描画
 function renderBoard(ghosts=[]) {
     boardEl.innerHTML = '';
     for (let y=0; y<boardSize; y++) {
@@ -75,7 +74,6 @@ function renderBoard(ghosts=[]) {
     }
 }
 
-// ブロック表示
 function renderBlocks() {
     blocksEl.innerHTML = '';
     blockShapes.forEach(shape => {
@@ -96,7 +94,6 @@ function renderBlocks() {
     });
 }
 
-// 置けるかどうか
 function canPlace(block, x, y, state=board) {
     for (let i=0; i<block.length; i++) {
         for (let j=0; j<block[i].length; j++) {
@@ -109,7 +106,6 @@ function canPlace(block, x, y, state=board) {
     return true;
 }
 
-// 仮想配置
 function simulatePlace(block, x, y, state) {
     const newBoard = state.map(row => [...row]);
     for (let i=0; i<block.length; i++) {
@@ -141,7 +137,7 @@ function isSafeMove(block, x, y, state) {
 function evaluateBoard(state) {
     let score = 0;
 
-    // 空きマスの数（多い方が良い）
+
     let emptyCount = 0;
     for (let y=0; y<8; y++) {
         for (let x=0; x<8; x++) {
@@ -150,7 +146,7 @@ function evaluateBoard(state) {
     }
     score += emptyCount;
 
-    // 消せる行や列の数（多い方が良い）
+
     for (let y=0; y<8; y++) {
         if (state[y].every(c => c===1)) score += 20;
     }
@@ -230,39 +226,7 @@ function showSafeHints(shape) {
     renderBoard(ghosts);
 }
 
-// // 安全な位置だけゴースト表示
-// function showSafeHints(shape) {
-//     let bestScore = -Infinity;
-//     let bestPos = null;
-
-//     for (let y=0; y<=8-shape.length; y++) {
-//         for (let x=0; x<=8-shape[0].length; x++) {
-//             if (canPlace(shape,x,y,board)) {
-//                 const newState = simulatePlace(shape,x,y,board);
-//                 if (hasAnyMove(newState)) {
-//                     const score = evaluateBoard(newState);
-//                     if (score > bestScore) {
-//                         bestScore = score;
-//                         bestPos = {x,y};
-//                     }
-//                 }
-//             }
-//         }
-//     }
-
-//     // 最良位置をゴースト表示
-//     const ghosts = [];
-//     if (bestPos) {
-//         shape.forEach((row,dy)=>row.forEach((val,dx)=>{
-//             if (val===1) ghosts.push({x:bestPos.x+dx,y:bestPos.y+dy,rootX:bestPos.x,rootY:bestPos.y});
-//         }));
-//     }
-
-//     renderBoard(ghosts);
-// }
-
-
-// 実際に置く
+    
 function placeBlock(block, x, y) {
     if (!canPlace(block,x,y,board)) return;
     for (let i=0; i<block.length; i++) {
@@ -274,13 +238,11 @@ function placeBlock(block, x, y) {
     renderBoard();
 }
 function clearLines() {
-    // 横ラインを確認
     for (let y = 0; y < boardSize; y++) {
         if (board[y].every(cell => cell === 1)) {
             board[y].fill(0);
         }
     }
-    // 縦ラインを確認
     for (let x = 0; x < boardSize; x++) {
         let full = true;
         for (let y = 0; y < boardSize; y++) {
@@ -308,3 +270,4 @@ renderBoard();
 renderBlocks();
 </script>
 </html>
+
