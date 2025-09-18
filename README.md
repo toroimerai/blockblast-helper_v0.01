@@ -1,9 +1,9 @@
 # blockblast-helper_v0.01
 <h1>ゲーム「ブロックブラスト」でのブロック生成がとても理不尽なため作りました😡😡😡😡😡</h1>
 <img width="890" height="564" alt="71c20c3a6bdf9351b76f1b8561e3b10d" src="https://github.com/user-attachments/assets/a948e3dd-6ce6-48be-a192-4dbecb56f78e" />
-<p>上記の画像のようにブロックブラストにも存在する数パターンのブロックを選択できるようにしました</p>
+<p>上記の画像のようにブロックブラストにも存在する数パターンのブロックを選択できます</p>
 <img width="340" height="335" alt="9a5424234eb8d6a473ae27ced41d0e9b" src="https://github.com/user-attachments/assets/c969439c-2916-4df1-bbed-6ed2dd93233f" />
-<p>ブロックを選択すると適切な配置場所(適当）をたった数行の関数という名のAIがターコイズのような青で教えてくれます。</p>
+<p>ブロックを選択すると適切な配置場所(適当）をたった数行の関数という名のAIがライトブルーで教えてくれます。</p>
 
 <h2>細かい機能説明等々</h2>
 ## 🧩 機能
