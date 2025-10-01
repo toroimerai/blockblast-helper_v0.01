@@ -48,12 +48,14 @@ const blockShapes = [
     [[1,1,1],[0,0,1]]         // 角付き逆L
 ];
 
+let currentHand = blockShapes.map((shape, index) => ({ id: index, shape }));
+
 // const blockShapes = [
 //     [[1,1,1]], [[1],[1],[1]], [[1,1],[1,1]],
 //     [[1,1,1,1]], [[1],[1],[1],[1]]
 // ];
 
-let selectedBlock = null;
+let selectedHandItem = null;
 const boardEl = document.getElementById('board');
 const blocksEl = document.getElementById('blocks');
 
@@ -67,7 +69,7 @@ function renderBoard(ghosts=[]) {
             if (ghosts.some(g => g.x===x && g.y===y)) {
                 cell.classList.add('ghost');
                 const root = ghosts.find(g => g.x===x && g.y===y);
-                cell.addEventListener('click', ()=>placeBlock(selectedBlock, root.rootX, root.rootY));
+                cell.addEventListener('click', ()=>placeBlock(root.handItem, root.rootX, root.rootY));
             }
             boardEl.appendChild(cell);
         }
@@ -76,7 +78,8 @@ function renderBoard(ghosts=[]) {
 
 function renderBlocks() {
     blocksEl.innerHTML = '';
-    blockShapes.forEach(shape => {
+    currentHand.forEach(handItem => {
+        const shape = handItem.shape;
         const block = document.createElement('div');
         block.className = 'block';
         block.style.gridTemplateColumns = `repeat(${shape[0].length}, 20px)`;
@@ -87,8 +90,8 @@ function renderBlocks() {
             block.appendChild(cell);
         }));
         block.addEventListener('click', () => {
-            selectedBlock = shape;
-            showSafeHints(shape);
+            selectedHandItem = handItem;
+            showSafeHints(handItem);
         });
         blocksEl.appendChild(block);
     });
@@ -159,7 +162,29 @@ function evaluateBoard(state) {
     return score;
 }
 
-function findBestPlacements(shape) {
+function countNextMoves(state, hand) {
+    if (hand.length === 0) return 1;
+
+    let total = 0;
+    for (let i = 0; i < hand.length; i++) {
+        const { shape } = hand[i];
+        for (let y = 0; y <= 8 - shape.length; y++) {
+            for (let x = 0; x <= 8 - shape[0].length; x++) {
+                if (canPlace(shape, x, y, state)) {
+                    const newState = simulatePlace(shape, x, y, state);
+                    const nextHand = hand.slice(0, i).concat(hand.slice(i + 1));
+                    const branchCount = countNextMoves(newState, nextHand);
+                    if (branchCount > 0) total += branchCount;
+                }
+            }
+        }
+    }
+    return total;
+}
+
+function findBestPlacements(handItem) {
+    const shape = handItem.shape;
+    const remainingHand = currentHand.filter(item => item !== handItem);
     let best = [];
     let bestScore = -1;
 
@@ -167,12 +192,14 @@ function findBestPlacements(shape) {
         for (let x=0; x<=8-shape[0].length; x++) {
             if (canPlace(shape, x, y, board)) {
                 const newState = simulatePlace(shape, x, y, board);
-                const score = countNextMoves(newState);
-                if (score > bestScore) {
-                    bestScore = score;
-                    best = [{x,y}];
-                } else if (score === bestScore) {
-                    best.push({x,y});
+                const score = countNextMoves(newState, remainingHand);
+                if (score > 0) {
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = [{x,y,handItem}];
+                    } else if (score === bestScore) {
+                        best.push({x,y,handItem});
+                    }
                 }
             }
         }
@@ -180,46 +207,18 @@ function findBestPlacements(shape) {
     return best;
 }
 
-function countNextMoves(state) {
-    let count = 0;
-    for (const shape of blockShapes) {
-        for (let y=0; y<=8-shape.length; y++) {
-            for (let x=0; x<=8-shape[0].length; x++) {
-                if (canPlace(shape, x, y, state)) count++;
-            }
-        }
+function showSafeHints(handItem) {
+    if (!handItem) {
+        renderBoard();
+        return;
     }
-    return count;
-}
 
-function findBestPlacements(shape) {
-    let best = [];
-    let bestScore = -1;
-
-    for (let y=0; y<=8-shape.length; y++) {
-        for (let x=0; x<=8-shape[0].length; x++) {
-            if (canPlace(shape, x, y, board)) {
-                const newState = simulatePlace(shape, x, y, board);
-                const score = countNextMoves(newState);
-                if (score > bestScore) {
-                    bestScore = score;
-                    best = [{x,y}];
-                } else if (score === bestScore) {
-                    best.push({x,y});
-                }
-            }
-        }
-    }
-    return best;
-}
-
-function showSafeHints(shape) {
-    const bestPositions = findBestPlacements(shape);
+    const bestPositions = findBestPlacements(handItem);
     const ghosts = [];
 
     bestPositions.forEach(pos => {
-        shape.forEach((row,dy)=>row.forEach((val,dx)=>{
-            if (val===1) ghosts.push({x:pos.x+dx,y:pos.y+dy,rootX:pos.x,rootY:pos.y});
+        pos.handItem.shape.forEach((row,dy)=>row.forEach((val,dx)=>{
+            if (val===1) ghosts.push({x:pos.x+dx,y:pos.y+dy,rootX:pos.x,rootY:pos.y,handItem:pos.handItem});
         }));
     });
 
@@ -227,15 +226,20 @@ function showSafeHints(shape) {
 }
 
     
-function placeBlock(block, x, y) {
+function placeBlock(handItem, x, y) {
+    if (!handItem) return;
+    const block = handItem.shape;
     if (!canPlace(block,x,y,board)) return;
     for (let i=0; i<block.length; i++) {
         for (let j=0; j<block[i].length; j++) {
             if (block[i][j]===1) board[y+i][x+j]=1;
         }
     }
+    currentHand = currentHand.filter(item => item !== handItem);
+    selectedHandItem = null;
     clearLines(); // ← 追加
     renderBoard();
+    renderBlocks();
 }
 function clearLines() {
     for (let y = 0; y < boardSize; y++) {
